@@ -2,8 +2,6 @@ package io.pivotal.pal.tracker;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -43,18 +41,22 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository {
 
         try {
             return this.jdbcTemplate.queryForObject(retrieveQuery, (rs, rowNum) -> {
-                TimeEntry entry = new TimeEntry();
-                entry.setId(rs.getInt(1));
-                entry.setProjectId(rs.getInt(2));
-                entry.setUserId(rs.getInt(3));
-                entry.setDate(LocalDate.parse(rs.getString(4)));
-                entry.setHours(rs.getInt(5));
-                return entry;
+                return setTimeEntryByResultSet(rs);
             });
         } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
             return null;
         }
 
+    }
+
+    private TimeEntry setTimeEntryByResultSet(ResultSet rs) throws SQLException {
+        TimeEntry entry = new TimeEntry();
+        entry.setId(rs.getInt(1));
+        entry.setProjectId(rs.getInt(2));
+        entry.setUserId(rs.getInt(3));
+        entry.setDate(LocalDate.parse(rs.getString(4)));
+        entry.setHours(rs.getInt(5));
+        return entry;
     }
 
     @Override
@@ -66,13 +68,7 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository {
     public List<TimeEntry> list() {
         String retrieveQuery = "SELECT * FROM time_entries";
         return this.jdbcTemplate.query(retrieveQuery, new Object[]{}, (rs, rowNum) -> {
-            TimeEntry entry = new TimeEntry();
-            entry.setId(rs.getInt(1));
-            entry.setProjectId(rs.getInt(2));
-            entry.setUserId(rs.getInt(3));
-            entry.setDate(LocalDate.parse(rs.getString(4)));
-            entry.setHours(rs.getInt(5));
-            return entry;
+            return setTimeEntryByResultSet(rs);
         });
     }
 
