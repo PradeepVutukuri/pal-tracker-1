@@ -1,0 +1,1 @@
+ALTER table time_entries ADD COLUMN user_name VARCHAR(32);
